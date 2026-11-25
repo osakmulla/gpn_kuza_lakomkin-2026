@@ -16,16 +16,8 @@ def side_mean(values, times, width, side):
     else:
         low = np.searchsorted(times, times, side="left")
         high = np.searchsorted(times, times + width, side="right")
-
     sums = np.concatenate([[0.0], np.cumsum(values)])
-
-    low = np.clip(low, 0, len(values))
-    high = np.clip(high, 0, len(values))
-
-    counts = high - low
-    counts = np.maximum(counts, 1)
-
-    return (sums[high] - sums[low]) / counts
+    return (sums[high] - sums[low]) / (high - low)
 
 
 clean = pd.read_csv("data/processed/clean.csv")
@@ -49,7 +41,6 @@ for series in sorted(clean["series_id"].unique()):
     times_by_series[series] = times
     total = np.zeros(len(rows))
     for column in range(Z.shape[1]):
-        rows = rows[rows < len(Z)]
         values = Z[rows, column]
         right = side_mean(values, times, CHANGE_WIDTH, "right")
         left = side_mean(values, times, CHANGE_WIDTH, "left")
@@ -128,17 +119,7 @@ for quantile in QUANTILES:
             changes = changes + int((series_labels[1:] != series_labels[:-1]).sum())
         switches_list.append(changes / len(labels) * 1000)
         state_list.append(adjusted_rand_score(state_code, labels))
-    if quantile in [0.97, 0.85]:
-    result = clean[["ID", "Time", "series_id"]].copy()
-    result["segment_id"] = segment_id
 
-    for i, seed in enumerate(SEEDS):
-        result[f"cluster_seed_{seed}"] = all_labels[i]
-
-    result.to_csv(
-        f"data/processed/segments_{quantile}.csv",
-        index=False
-    )
     seed_list = []
     for i in range(1, len(SEEDS)):
         seed_list.append(adjusted_rand_score(all_labels[0], all_labels[i]))
