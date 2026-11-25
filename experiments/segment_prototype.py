@@ -49,6 +49,7 @@ for series in sorted(clean["series_id"].unique()):
     times_by_series[series] = times
     total = np.zeros(len(rows))
     for column in range(Z.shape[1]):
+        rows = rows[rows < len(Z)]
         values = Z[rows, column]
         right = side_mean(values, times, CHANGE_WIDTH, "right")
         left = side_mean(values, times, CHANGE_WIDTH, "left")
