@@ -119,7 +119,17 @@ for quantile in QUANTILES:
             changes = changes + int((series_labels[1:] != series_labels[:-1]).sum())
         switches_list.append(changes / len(labels) * 1000)
         state_list.append(adjusted_rand_score(state_code, labels))
+    if quantile in [0.97, 0.85]:
+    result = clean[["ID", "Time", "series_id"]].copy()
+    result["segment_id"] = segment_id
 
+    for i, seed in enumerate(SEEDS):
+        result[f"cluster_seed_{seed}"] = all_labels[i]
+
+    result.to_csv(
+        f"data/processed/segments_{quantile}.csv",
+        index=False
+    )
     seed_list = []
     for i in range(1, len(SEEDS)):
         seed_list.append(adjusted_rand_score(all_labels[0], all_labels[i]))
