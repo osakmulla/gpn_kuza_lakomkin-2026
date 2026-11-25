@@ -16,8 +16,16 @@ def side_mean(values, times, width, side):
     else:
         low = np.searchsorted(times, times, side="left")
         high = np.searchsorted(times, times + width, side="right")
+
     sums = np.concatenate([[0.0], np.cumsum(values)])
-    return (sums[high] - sums[low]) / (high - low)
+
+    low = np.clip(low, 0, len(values))
+    high = np.clip(high, 0, len(values))
+
+    counts = high - low
+    counts = np.maximum(counts, 1)
+
+    return (sums[high] - sums[low]) / counts
 
 
 clean = pd.read_csv("data/processed/clean.csv")
